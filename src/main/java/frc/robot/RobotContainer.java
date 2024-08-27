@@ -5,14 +5,14 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.Autos;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-
+import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Drivetrain;
 
 
 /**
@@ -24,8 +24,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class RobotContainer
 {
     // The robot's subsystems and commands are defined here...
-    private final ExampleSubsystem exampleSubsystem = new ExampleSubsystem();
-    
+    private final Drivetrain drivetrain = TunerConstants.DriveTrain;
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(Constants.Drivetrain.MAX_SPEED * 0.1)
+            .withRotationalDeadband(Constants.Drivetrain.MAX_ANGULAR_RATE * 0.1)
+            .withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
+
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController driverController =
             new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
@@ -50,13 +54,11 @@ public class RobotContainer
      */
     private void configureBindings()
     {
-        // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-        new Trigger(exampleSubsystem::exampleCondition)
-                .onTrue(new ExampleCommand(exampleSubsystem));
-        
-        // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-        // cancelling on release.
-        driverController.b().whileTrue(exampleSubsystem.exampleMethodCommand());
+        drivetrain.setDefaultCommand(
+                drivetrain.applyRequest(() -> drive
+                       .withVelocityX(-driverController.getLeftY() * Constants.Drivetrain.MAX_SPEED)
+                       .withVelocityY(-driverController.getLeftX() * Constants.Drivetrain.MAX_SPEED)
+                       .withRotationalRate(-driverController.getRightX() * Constants.Drivetrain.MAX_ANGULAR_RATE)).ignoringDisable(true));
     }
     
     
@@ -67,7 +69,6 @@ public class RobotContainer
      */
     public Command getAutonomousCommand()
     {
-        // An example command will be run in autonomous
-        return Autos.exampleAuto(exampleSubsystem);
+        return null;
     }
 }
