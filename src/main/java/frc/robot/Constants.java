@@ -17,12 +17,18 @@ import frc.robot.generated.TunerConstants;
  */
 public final class Constants
 {
+    public static class AutoConstants {
+        public static final double kPThetaController = 0;
+        public static final double kPXController = 0;
+        public static final double kPYController = 0;
+    }
+
     public static class OperatorConstants
     {
         public static final int DRIVER_CONTROLLER_PORT = 0;
     }
 
-    public static class Drivetrain{
+    public static class Drivetrain {
         public static final double MAX_SPEED = TunerConstants.kSpeedAt12VoltsMps * 0.75;
         public static final double MAX_AUTO_SPEED = TunerConstants.kSpeedAt12VoltsMps*0.8;
         public static final double MAX_ANGULAR_RATE = 1.5 * Math.PI;

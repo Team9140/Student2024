@@ -5,9 +5,17 @@
 
 package frc.robot;
 
+import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.OperatorConstants;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -33,11 +41,26 @@ public class RobotContainer
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController driverController =
             new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
-    
+
+    Field2d m_field = new Field2d();
+
+    ChoreoTrajectory traj;
     
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer()
     {
+        traj = Choreo.getTrajectory("TestPath");
+
+        m_field.getObject("traj").setPoses(
+                traj.getInitialPose(), traj.getFinalPose()
+        );
+        m_field.getObject("trajPoses").setPoses(
+                traj.getPoses()
+        );
+        m_field.setRobotPose(drivetrain.getState().Pose);
+
+        SmartDashboard.putData(m_field);
+
         // Configure the trigger bindings
         configureBindings();
     }
@@ -69,6 +92,28 @@ public class RobotContainer
      */
     public Command getAutonomousCommand()
     {
-        return null;
+        var thetaController = new PIDController(Constants.AutoConstants.kPThetaController, 0, 0);
+        thetaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        drivetrain.seedFieldRelative(traj.getInitialPose());
+
+        Command swerveCommand = Choreo.choreoSwerveCommand(
+                traj,
+                () -> drivetrain.getState().Pose,
+                new PIDController(Constants.AutoConstants.kPXController, 0.0, 0.0),
+                new PIDController(Constants.AutoConstants.kPYController, 0.0, 0.0),
+                thetaController,
+                (ChassisSpeeds speeds) -> drivetrain.setControl(
+                        new SwerveRequest.ApplyChassisSpeeds().withSpeeds(speeds)
+                ),
+                () -> DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Red).equals(DriverStation.Alliance.Red), // Whether to mirror the path based on alliance (this assumes the path is created for the blue alliance)
+                drivetrain // The subsystem(s) to require
+        );
+
+        return Commands.sequence(
+                Commands.runOnce(() -> drivetrain.seedFieldRelative(traj.getInitialPose())),
+                swerveCommand,
+                drivetrain.run(() -> drivetrain.setControl(new SwerveRequest.ApplyChassisSpeeds().withSpeeds(new ChassisSpeeds(0, 0, 0))))
+        );
     }
 }
