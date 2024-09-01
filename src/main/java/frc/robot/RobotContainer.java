@@ -34,8 +34,8 @@ public class RobotContainer
     // The robot's subsystems and commands are defined here...
     private final Drivetrain drivetrain = TunerConstants.DriveTrain;
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-            .withDeadband(Constants.Drivetrain.MAX_SPEED * 0.1)
-            .withRotationalDeadband(Constants.Drivetrain.MAX_ANGULAR_RATE * 0.1)
+            .withDeadband(Constants.Drivetrain.MAX_TELEOP_SPEED * 0.1)
+            .withRotationalDeadband(Constants.Drivetrain.MAX_TELEOP_ANGULAR_RATE * 0.1)
             .withDriveRequestType(SwerveModule.DriveRequestType.Velocity);
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -50,16 +50,6 @@ public class RobotContainer
     public RobotContainer()
     {
         traj = Choreo.getTrajectory("TestPath");
-
-        m_field.getObject("traj").setPoses(
-                traj.getInitialPose(), traj.getFinalPose()
-        );
-        m_field.getObject("trajPoses").setPoses(
-                traj.getPoses()
-        );
-        m_field.setRobotPose(drivetrain.getState().Pose);
-
-        SmartDashboard.putData(m_field);
 
         // Configure the trigger bindings
         configureBindings();
@@ -79,9 +69,9 @@ public class RobotContainer
     {
         drivetrain.setDefaultCommand(
                 drivetrain.applyRequest(() -> drive
-                       .withVelocityX(-driverController.getLeftY() * Constants.Drivetrain.MAX_SPEED)
-                       .withVelocityY(-driverController.getLeftX() * Constants.Drivetrain.MAX_SPEED)
-                       .withRotationalRate(-driverController.getRightX() * Constants.Drivetrain.MAX_ANGULAR_RATE)).ignoringDisable(true));
+                       .withVelocityX(-driverController.getLeftY() * Constants.Drivetrain.MAX_TELEOP_SPEED)
+                       .withVelocityY(-driverController.getLeftX() * Constants.Drivetrain.MAX_TELEOP_SPEED)
+                       .withRotationalRate(-driverController.getRightX() * Constants.Drivetrain.MAX_TELEOP_ANGULAR_RATE)).ignoringDisable(true));
     }
     
     
@@ -92,10 +82,24 @@ public class RobotContainer
      */
     public Command getAutonomousCommand()
     {
-        var thetaController = new PIDController(Constants.AutoConstants.kPThetaController, 0, 0);
+        boolean isRed = DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Red).equals(DriverStation.Alliance.Red);
+        PIDController thetaController = new PIDController(Constants.AutoConstants.kPThetaController, 0, 0);
         thetaController.enableContinuousInput(-Math.PI, Math.PI);
 
-        drivetrain.seedFieldRelative(traj.getInitialPose());
+        drivetrain.seedFieldRelative(isRed ? traj.getFlippedInitialPose() : traj.getInitialPose());
+
+        m_field.getObject("traj").setPoses(
+                isRed ? traj.getFlippedInitialPose() : traj.getInitialPose(),
+                isRed ? traj.getFlippedFinalPose() : traj.getFinalPose()
+        );
+        m_field.getObject("trajPoses").setPoses(
+                isRed ? traj.flipped().getPoses() : traj.getPoses()
+        );
+
+        SmartDashboard.putData(m_field);
+
+        SmartDashboard.putString("starting position", (isRed ? traj.getFlippedInitialPose() : traj.getInitialPose()).toString());
+        SmartDashboard.putString("desired ending position", (isRed ? traj.getFlippedFinalPose() : traj.getFinalPose()).toString());
 
         Command swerveCommand = Choreo.choreoSwerveCommand(
                 traj,
@@ -103,15 +107,13 @@ public class RobotContainer
                 new PIDController(Constants.AutoConstants.kPXController, 0.0, 0.0),
                 new PIDController(Constants.AutoConstants.kPYController, 0.0, 0.0),
                 thetaController,
-                (ChassisSpeeds speeds) -> drivetrain.setControl(
-                        new SwerveRequest.ApplyChassisSpeeds().withSpeeds(speeds)
-                ),
-                () -> DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Red).equals(DriverStation.Alliance.Red), // Whether to mirror the path based on alliance (this assumes the path is created for the blue alliance)
+                (ChassisSpeeds speeds) -> drivetrain.setControl(new SwerveRequest.ApplyChassisSpeeds().withSpeeds(speeds)),
+                () -> isRed, // Whether to mirror the path based on alliance (this assumes the path is created for the blue alliance)
                 drivetrain // The subsystem(s) to require
         );
 
         return Commands.sequence(
-                Commands.runOnce(() -> drivetrain.seedFieldRelative(traj.getInitialPose())),
+                Commands.runOnce(() -> drivetrain.seedFieldRelative(isRed ? traj.getFlippedInitialPose() : traj.getInitialPose())),
                 swerveCommand,
                 drivetrain.run(() -> drivetrain.setControl(new SwerveRequest.ApplyChassisSpeeds().withSpeeds(new ChassisSpeeds(0, 0, 0))))
         );
