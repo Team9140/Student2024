@@ -2746,12 +2746,6 @@
             "constraints": [
                 {
                     "scope": [
-                        "first"
-                    ],
-                    "type": "StopPoint"
-                },
-                {
-                    "scope": [
                         "last"
                     ],
                     "type": "StopPoint"
@@ -2763,6 +2757,12 @@
                     ],
                     "type": "MaxVelocity",
                     "velocity": 1
+                },
+                {
+                    "scope": [
+                        "first"
+                    ],
+                    "type": "StopPoint"
                 }
             ],
             "usesControlIntervalGuessing": true,
