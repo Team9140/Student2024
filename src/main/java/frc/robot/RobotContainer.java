@@ -71,8 +71,14 @@ public class RobotContainer
      */
     public Command getAutonomousCommand()
     {
-        RunAuto auto = new RunAuto("TestPath", drivetrain, 1, true);
-        auto.scheduleParallelEvent(new PrintCommand("First note?"), 0, 2.19);
+        RunAuto auto = new RunAuto("TestPath", this.drivetrain, 1, true);
+        auto.setBlockedEvent(new PrintCommand("First shot."), 0);
+        auto.scheduleParallelEvent(new PrintCommand("First intake."), 0, 2.19);
+        auto.scheduleParallelEvent(new PrintCommand("Second shot."), 0, 3.98);
+        auto.scheduleParallelEvent(new PrintCommand("Second intake."), 0, 5.33);
+        auto.scheduleParallelEvent(new PrintCommand("Third shot."), 1, -3.60);
+        auto.scheduleParallelEvent(new PrintCommand("Third intake."), 1, -2.00);
+        auto.setBlockedEvent(new PrintCommand("Final shot."), 1);
 
         return auto;
     }

@@ -4,24 +4,24 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.Drivetrain;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class RunAuto extends Command {
     private final FollowPath[] paths;
     private final ArrayList<Command> blockedEvents;
     private final ArrayList<ArrayList<Command>> parallelEvents;
+    private final Command[] finalizedPaths;
     private Drivetrain m_drive;
     private int currentPath;
 
     public RunAuto(String name, Drivetrain drivetrain, int numPaths, boolean mirror) {
         this.m_drive = drivetrain;
         this.paths = new FollowPath[numPaths];
-        this.blockedEvents = new ArrayList<Command>(numPaths + 1);
+        this.blockedEvents = new ArrayList<>(numPaths + 1);
+        this.finalizedPaths = new Command[numPaths + 1];
 
         for (int i = 0; i < numPaths + 1; i++) {
             this.blockedEvents.add(null);
@@ -30,7 +30,7 @@ public class RunAuto extends Command {
         this.parallelEvents = new ArrayList<>();
 
         for (int i = 0; i < numPaths; i++) {
-            this.parallelEvents.add(new ArrayList<Command>());
+            this.parallelEvents.add(new ArrayList<>());
         }
 
         for (int i = 0; i < numPaths; i++) {
@@ -39,20 +39,23 @@ public class RunAuto extends Command {
 
         Field2d field = new Field2d();
 
+        field.getObject("traj").setPoses();
+        field.getObject("trajPoses").setPoses();
+
+        ArrayList<Pose2d> traj = new ArrayList<>();
+        ArrayList<Pose2d> trajPoses = new ArrayList<>();
+
         for (FollowPath path : this.paths) {
-            List<Pose2d> traj = field.getObject("traj").getPoses();
             traj.add(path.getInitialPose());
-            field.getObject("traj").setPoses(traj);
 
-            List<Pose2d> trajPoses = field.getObject("trajPoses").getPoses();
             trajPoses.addAll(path.getPoses());
-            field.getObject("trajPoses").setPoses(trajPoses);
-
-            SmartDashboard.putData(field);
         }
-        List<Pose2d> traj = field.getObject("traj").getPoses();
+
         traj.add(this.paths[this.paths.length - 1].getFinalPose());
         field.getObject("traj").setPoses(traj);
+        field.getObject("trajPoses").setPoses(trajPoses);
+
+        SmartDashboard.putData(field);
     }
 
     public void setBlockedEvent(Command event, int position) {
@@ -68,21 +71,23 @@ public class RunAuto extends Command {
     }
 
     private Command getPathCommand(int pathIndex) {
+        if (this.finalizedPaths[pathIndex] != null) {
+            return this.finalizedPaths[pathIndex];
+        }
+
         Command blockedEvent = this.blockedEvents.get(pathIndex);
 
         if (pathIndex == this.paths.length) {
             return blockedEvent != null ? blockedEvent : new WaitCommand(0.0);
         }
 
-        ParallelCommandGroup path = new ParallelCommandGroup(this.paths[pathIndex]);
-
-        for (Command parallelEvent : this.parallelEvents.get(pathIndex)) {
-            path.addCommands(parallelEvent);
-        }
+        Command path = this.paths[pathIndex].alongWith(this.parallelEvents.get(pathIndex).toArray(new Command[0]));
 
         if (blockedEvent != null) {
-            return blockedEvent.andThen(path);
+            path = blockedEvent.andThen(path);
         }
+
+        this.finalizedPaths[pathIndex] = path;
 
         return path;
     }

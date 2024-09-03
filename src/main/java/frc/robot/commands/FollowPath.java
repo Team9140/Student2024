@@ -22,20 +22,22 @@ public class FollowPath extends Command {
     private Timer m_timer;
     private Drivetrain m_drive;
     private SwerveRequest.ApplyChassisSpeeds m_request;
-    private boolean mirror;
 
     public FollowPath(String name, Drivetrain drive, boolean mirror) {
         m_drive = drive;
         m_request = new SwerveRequest.ApplyChassisSpeeds();
         addRequirements(drive);
         this.trajectory = Choreo.getTrajectory(name);
-        this.mirror = mirror;
         this.controller = Choreo.choreoSwerveController(
                 new PIDController(Constants.AutoConstants.kPXController, 0.0, 0.0),
                 new PIDController(Constants.AutoConstants.kPYController, 0.0, 0.0),
                 new PIDController(Constants.AutoConstants.kPThetaController, 0.0, 0.0)
         );
         this.m_timer = new Timer();
+
+        if (mirror && DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)) {
+            this.trajectory = this.trajectory.flipped();
+        }
     }
 
     public double getTotalTime() {
@@ -45,10 +47,6 @@ public class FollowPath extends Command {
     @Override
     public void initialize() {
         this.m_timer.restart();
-
-        if (this.mirror && DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Red)) {
-            this.trajectory = this.trajectory.flipped();
-        }
     }
 
     @Override
