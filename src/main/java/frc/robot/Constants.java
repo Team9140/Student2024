@@ -17,6 +17,10 @@ import frc.robot.generated.TunerConstants;
  */
 public final class Constants
 {
+    public static final int CANDLE_LEDS_PER_ANIMATION = 30;
+    public static final double CANDLE_BRIGHTNESS = 1.0;
+
+
     public static class AutoConstants {
         public static final double kPThetaController = 16;
         public static final double kPXController = 0.5;
@@ -32,5 +36,11 @@ public final class Constants
         public static final double MAX_TELEOP_SPEED = TunerConstants.kSpeedAt12VoltsMps * 0.75;
         public static final double MAX_AUTO_SPEED = TunerConstants.kSpeedAt12VoltsMps * 0.8;
         public static final double MAX_TELEOP_ANGULAR_RATE = 1.5 * Math.PI;
+    }
+
+    public static class Ports {
+        public static final String CTRE_CANBUS = "moe";
+        public static final int CANDLE = 0;
+
     }
 }

@@ -8,14 +8,15 @@ package frc.robot;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
+import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.Constants.OperatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.FollowPath;
 import frc.robot.commands.RunAuto;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Drivetrain;
+
+import java.util.function.BooleanSupplier;
 
 
 /**
@@ -36,7 +37,8 @@ public class RobotContainer
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController driverController =
             new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
-    
+
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer()
     {
@@ -47,11 +49,11 @@ public class RobotContainer
     
     /**
      * Use this method to define your trigger->command mappings. Triggers can be created via the
-     * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+     * {@link Trigger#Trigger(BooleanSupplier)} constructor with an arbitrary
      * predicate, or via the named factories in {@link
-     * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-     * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-     * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+     * CommandGenericHID}'s subclasses for {@link
+     * CommandXboxController Xbox}/{@link CommandPS4Controller
+     * PS4} controllers or {@link CommandJoystick Flight
      * joysticks}.
      */
     private void configureBindings()
@@ -69,16 +71,21 @@ public class RobotContainer
      *
      * @return the command to run in autonomous
      */
-    public Command getAutonomousCommand()
+    public Command getAutonomousCommand(String autoName)
     {
-        RunAuto auto = new RunAuto("TestPath", this.drivetrain, 1, true);
-        auto.setBlockedEvent(new PrintCommand("First shot."), 0);
-        auto.scheduleParallelEvent(new PrintCommand("First intake."), 0, 2.19);
-        auto.scheduleParallelEvent(new PrintCommand("Second shot."), 0, 3.98);
-        auto.scheduleParallelEvent(new PrintCommand("Second intake."), 0, 5.33);
-        auto.scheduleParallelEvent(new PrintCommand("Third shot."), 1, -3.60);
-        auto.scheduleParallelEvent(new PrintCommand("Third intake."), 1, -2.00);
-        auto.setBlockedEvent(new PrintCommand("Final shot."), 1);
+        RunAuto auto = null;
+
+        if ("TestPath".equals(autoName)) {
+            auto = new RunAuto("TestPath", this.drivetrain, 1, true);
+            auto.setBlockedEvent(new PrintCommand("First shot."), 0);
+            auto.scheduleParallelEvent(new PrintCommand("First intake."), 0, 2.19);
+            auto.scheduleParallelEvent(new PrintCommand("Second shot."), 0, 3.98);
+            auto.scheduleParallelEvent(new PrintCommand("Second intake."), 0, 5.33);
+            auto.scheduleParallelEvent(new PrintCommand("Third shot."), 1, -3.60);
+            auto.scheduleParallelEvent(new PrintCommand("Third intake."), 1, -2.00);
+            auto.setBlockedEvent(new PrintCommand("Final shot."), 1);
+        }
+
 
         return auto;
     }
