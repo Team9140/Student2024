@@ -17,6 +17,23 @@ public class RunAuto extends Command {
     private Drivetrain m_drive;
     private int currentPath;
 
+    public RunAuto(String name, Drivetrain drivetrain, int numPaths, boolean mirror, Field2d field) {
+        this(name, drivetrain, numPaths, mirror);
+
+        ArrayList<Pose2d> traj = new ArrayList<>();
+        ArrayList<Pose2d> trajPoses = new ArrayList<>();
+
+        for (FollowPath path : this.paths) {
+            traj.add(path.getInitialPose());
+
+            trajPoses.addAll(path.getPoses());
+        }
+
+        traj.add(this.paths[this.paths.length - 1].getFinalPose());
+        field.getObject("traj").setPoses(traj);
+        field.getObject("trajPoses").setPoses(trajPoses);
+    }
+
     public RunAuto(String name, Drivetrain drivetrain, int numPaths, boolean mirror) {
         this.m_drive = drivetrain;
         this.paths = new FollowPath[numPaths];
@@ -36,26 +53,6 @@ public class RunAuto extends Command {
         for (int i = 0; i < numPaths; i++) {
             this.paths[i] = new FollowPath(String.format("%s.%d", name, i + 1), this.m_drive, mirror);
         }
-
-        Field2d field = new Field2d();
-
-        field.getObject("traj").setPoses();
-        field.getObject("trajPoses").setPoses();
-
-        ArrayList<Pose2d> traj = new ArrayList<>();
-        ArrayList<Pose2d> trajPoses = new ArrayList<>();
-
-        for (FollowPath path : this.paths) {
-            traj.add(path.getInitialPose());
-
-            trajPoses.addAll(path.getPoses());
-        }
-
-        traj.add(this.paths[this.paths.length - 1].getFinalPose());
-        field.getObject("traj").setPoses(traj);
-        field.getObject("trajPoses").setPoses(trajPoses);
-
-        SmartDashboard.putData(field);
     }
 
     public void setBlockedEvent(Command event, int position) {

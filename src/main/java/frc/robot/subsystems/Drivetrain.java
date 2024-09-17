@@ -9,7 +9,6 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -24,7 +23,7 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
 
-    private Field2d position = new Field2d();
+    private Field2d field = new Field2d();
     // ADIS16470_IMU green_gyro;
 
 
@@ -99,6 +98,10 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
         // green_gyro = new ADIS16470_IMU();
     }
 
+    public void setField(Field2d field) {
+        this.field = field;
+    }
+
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
         return run(() -> this.setControl(requestSupplier.get()));
     }
@@ -116,8 +119,7 @@ public class Drivetrain extends SwerveDrivetrain implements Subsystem {
         SmartDashboard.putNumber("wheel velocity", this.Modules[0].getDriveMotor().getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("wheel velocity error", this.Modules[0].getDriveMotor().getClosedLoopError().getValueAsDouble());
 
-        position.setRobotPose(this.getState().Pose);
-        SmartDashboard.putData(position);
+        this.field.setRobotPose(this.getState().Pose);
 
         SmartDashboard.putNumber("steer error", this.getState().Pose.getRotation().getRadians());
 

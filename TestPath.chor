@@ -77,6 +77,15 @@
                     "translationConstrained": true,
                     "headingConstrained": true,
                     "controlIntervalCount": 40
+                },
+                {
+                    "x": 8.08178997039795,
+                    "y": 5.830445289611816,
+                    "heading": 0,
+                    "isInitialGuess": false,
+                    "translationConstrained": true,
+                    "headingConstrained": true,
+                    "controlIntervalCount": 40
                 }
             ],
             "trajectory": [
@@ -2756,7 +2765,7 @@
                         "last"
                     ],
                     "type": "MaxVelocity",
-                    "velocity": 1
+                    "direction": 0
                 },
                 {
                     "scope": [

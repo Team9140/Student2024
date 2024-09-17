@@ -7,11 +7,12 @@ package frc.robot;
 
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.Constants.OperatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.commands.FollowPath;
 import frc.robot.commands.RunAuto;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Drivetrain;
@@ -38,10 +39,15 @@ public class RobotContainer
     private final CommandXboxController driverController =
             new CommandXboxController(OperatorConstants.DRIVER_CONTROLLER_PORT);
 
+    private final Field2d m_field = new Field2d();
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer()
     {
+        SmartDashboard.putData("Field", this.m_field);
+
+        this.drivetrain.setField(this.m_field);
+
         // Configure the trigger bindings
         configureBindings();
     }
@@ -76,7 +82,7 @@ public class RobotContainer
         RunAuto auto = null;
 
         if ("TestPath".equals(autoName)) {
-            auto = new RunAuto("TestPath", this.drivetrain, 1, true);
+            auto = new RunAuto("TestPath", this.drivetrain, 1, true, this.m_field);
             auto.setBlockedEvent(new PrintCommand("First shot."), 0);
             auto.scheduleParallelEvent(new PrintCommand("First intake."), 0, 2.19);
             auto.scheduleParallelEvent(new PrintCommand("Second shot."), 0, 3.98);
@@ -84,6 +90,9 @@ public class RobotContainer
             auto.scheduleParallelEvent(new PrintCommand("Third shot."), 1, -3.60);
             auto.scheduleParallelEvent(new PrintCommand("Third intake."), 1, -2.00);
             auto.setBlockedEvent(new PrintCommand("Final shot."), 1);
+        } else {
+            this.m_field.getObject("traj").setPoses();
+            this.m_field.getObject("trajPoses").setPoses();
         }
 
 
