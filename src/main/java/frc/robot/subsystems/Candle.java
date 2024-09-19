@@ -1,9 +1,7 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix.led.*;
-import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Constants;
 
 /**
@@ -41,13 +39,19 @@ public class Candle extends SubsystemBase {
         Empty
     }
 
-    public Candle() {
+    public static Candle instance;
+
+    private Candle() {
         this.setAnimation(AnimationTypes.Empty);
 
         CANdleConfiguration config = new CANdleConfiguration();
         config.stripType = CANdle.LEDStripType.GRB;
         config.brightnessScalar = Constants.CANDLE_BRIGHTNESS;
         this.candle.configAllSettings(config);
+    }
+
+    public static Candle getInstance() {
+        return Candle.instance == null ? Candle.instance = new Candle() : Candle.instance;
     }
 
     /**
@@ -68,10 +72,13 @@ public class Candle extends SubsystemBase {
      * @param g The green value of the requested color
      * @param b The blue value of the requested color
      **/
-    public void setColor(int r, int g, int b) {
+    public Command setColor(int r, int g, int b) {
         this.setAnimation(AnimationTypes.Empty);
-        this.specialAnimation = true;
-        this.candle.setLEDs(r, g, b);
+        return this.runOnce(() -> {
+            this.specialAnimation = true;
+            this.candle.setLEDs(r, g, b);
+        });
+
     }
 
     /**
@@ -81,23 +88,27 @@ public class Candle extends SubsystemBase {
      * @param b The blue value of the requested color
      * @param duration How long to have the requested color in seconds
      **/
-    public void setColor(int r, int g, int b, double duration) {
-        Animation previous = this.toAnimate;
-        this.setAnimation(AnimationTypes.Empty);
-        this.specialAnimation = true;
-        this.candle.setLEDs(r, g, b);
-        CommandScheduler.getInstance().schedule((new WaitCommand(duration)).andThen(() -> {
-            this.toAnimate = previous;
-            this.specialAnimation = false;
-        }));
+    public Command setColor(int r, int g, int b, double duration) {
+        return this.setColor(r, g, b).withTimeout(duration).andThen(this.turnOff());
     }
 
     /**
      * Turns off the LEDs
-     **/
-    public void turnOff() {
-        this.specialAnimation = true;
-        this.candle.setLEDs(0, 0, 0);
+     *
+     * @return
+     */
+    public Command turnOff() {
+        return this.runOnce(()-> {
+            this.specialAnimation = true;
+            this.candle.setLEDs(0, 0, 0);
+        });
+    }
+
+    public Command flash(int r, int g, int b, int flashDuration, int duration){
+        return this.run(()->{
+            this.setColor(r, g, b);
+            new WaitCommand(flashDuration);
+        }).repeatedly().withTimeout(duration);
     }
 
     /**
@@ -147,7 +158,9 @@ public class Candle extends SubsystemBase {
         }
     }
 
-    public void setAnimation(AnimationTypes animation) {
-        this.setAnimation(animation, 0.0);
+    public Command setAnimation(AnimationTypes animation) {
+       return this.runOnce(() -> {
+           this.setAnimation(animation, 0.0);
+       });
     }
 }

@@ -1,18 +1,22 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.Pair;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.Drivetrain;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
 
 public class RunAuto extends Command {
     private final FollowPath[] paths;
     private final ArrayList<Command> blockedEvents;
-    private final ArrayList<ArrayList<Command>> parallelEvents;
+    private final ArrayList<ArrayList<Pair<Double, Command>>> parallelEvents;
     private final Command[] finalizedPaths;
     private Drivetrain m_drive;
     private int currentPath;
@@ -61,10 +65,27 @@ public class RunAuto extends Command {
 
     public void scheduleParallelEvent(Command event, int stopIndex, double offset) {
         if (offset >= 0) {
-            this.parallelEvents.get(stopIndex).add(new WaitCommand(offset).andThen(event));
+            this.parallelEvents.get(stopIndex).add(new Pair<>(offset, event));
         } else {
-            this.parallelEvents.get(stopIndex - 1).add(new WaitCommand(paths[stopIndex - 1].getTotalTime() + offset).andThen(event));
+            this.parallelEvents.get(stopIndex - 1).add(new Pair<>(paths[stopIndex - 1].getTotalTime() + offset, event));
         }
+    }
+
+    public SequentialCommandGroup generateParallelCommand(int pathIndex) {
+        ArrayList<Pair<Double, Command>> currentCommands = this.parallelEvents.get(pathIndex);
+        currentCommands.sort(Comparator.comparing(Pair::getFirst));
+
+        LinkedList<Command> spacedCommands = new LinkedList<>();
+
+        for (int i = currentCommands.size() - 1; i > 0; i--) {
+            spacedCommands.addFirst(currentCommands.get(i).getSecond());
+            spacedCommands.addFirst(new WaitCommand(currentCommands.get(i).getFirst() - currentCommands.get(i - 1).getFirst()));
+        }
+
+        spacedCommands.addFirst(currentCommands.get(0).getSecond());
+        spacedCommands.addFirst(new WaitCommand(currentCommands.get(0).getFirst()));
+
+        return new SequentialCommandGroup(spacedCommands.toArray(new Command[0]));
     }
 
     private Command getPathCommand(int pathIndex) {
@@ -78,7 +99,7 @@ public class RunAuto extends Command {
             return blockedEvent != null ? blockedEvent : new WaitCommand(0.0);
         }
 
-        Command path = this.paths[pathIndex].alongWith(this.parallelEvents.get(pathIndex).toArray(new Command[0]));
+        Command path = this.paths[pathIndex].alongWith(this.generateParallelCommand(pathIndex));
 
         if (blockedEvent != null) {
             path = blockedEvent.andThen(path);

@@ -15,6 +15,7 @@ import frc.robot.Constants.OperatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.commands.RunAuto;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Candle;
 import frc.robot.subsystems.Drivetrain;
 
 import java.util.function.BooleanSupplier;
@@ -41,9 +42,12 @@ public class RobotContainer
 
     private final Field2d m_field = new Field2d();
 
+    private final Candle candle;
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer()
     {
+        this.candle = Candle.getInstance();
         SmartDashboard.putData("Field", this.m_field);
 
         this.drivetrain.setField(this.m_field);
@@ -90,6 +94,13 @@ public class RobotContainer
             auto.scheduleParallelEvent(new PrintCommand("Third shot."), 1, -3.60);
             auto.scheduleParallelEvent(new PrintCommand("Third intake."), 1, -2.00);
             auto.setBlockedEvent(new PrintCommand("Final shot."), 1);
+            auto.setBlockedEvent(this.candle.setColor(0,20,30, 1), 0);
+            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 1, -2.00);
+            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 2.19);
+            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 5.33);
+            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 3.98);
+            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 1, -3.60);
+            auto.setBlockedEvent(this.candle.setColor(0, 255, 0, 1), 1);
         } else {
             this.m_field.getObject("traj").setPoses();
             this.m_field.getObject("trajPoses").setPoses();

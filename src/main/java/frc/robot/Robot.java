@@ -43,7 +43,7 @@ public class Robot extends TimedRobot
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
         this.robotContainer = new RobotContainer();
-        this.candle = new Candle();
+        this.candle = Candle.getInstance();
         new Trigger(() -> DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue).equals(DriverStation.Alliance.Blue))
                 .onTrue(Commands.runOnce(() -> this.autonomousCommand = this.robotContainer.getAutonomousCommand(this.autoName)).ignoringDisable(true))
                 .onFalse(Commands.runOnce(() -> this.autonomousCommand = this.robotContainer.getAutonomousCommand(this.autoName)).ignoringDisable(true));
