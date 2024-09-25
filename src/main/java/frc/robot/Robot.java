@@ -50,6 +50,8 @@ public class Robot extends TimedRobot
 
         this.autoChooser = new SendableChooser<>();
         this.autoChooser.addOption("Skibidi Rizz", "TestPath");
+        this.autoChooser.addOption("Source side", "SourceSide");
+        this.autoChooser.addOption("Amp side", "AmpSide");
         this.autoChooser.setDefaultOption("None", null);
         this.autoChooser.onChange((name) -> {
             this.autoName = name;

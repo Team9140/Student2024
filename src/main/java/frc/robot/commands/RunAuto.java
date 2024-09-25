@@ -82,8 +82,10 @@ public class RunAuto extends Command {
             spacedCommands.addFirst(new WaitCommand(currentCommands.get(i).getFirst() - currentCommands.get(i - 1).getFirst()));
         }
 
-        spacedCommands.addFirst(currentCommands.get(0).getSecond());
-        spacedCommands.addFirst(new WaitCommand(currentCommands.get(0).getFirst()));
+        if (!spacedCommands.isEmpty()) {
+            spacedCommands.addFirst(currentCommands.get(0).getSecond());
+            spacedCommands.addFirst(new WaitCommand(currentCommands.get(0).getFirst()));
+        }
 
         return new SequentialCommandGroup(spacedCommands.toArray(new Command[0]));
     }

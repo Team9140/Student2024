@@ -84,29 +84,34 @@ public class RobotContainer
     public Command getAutonomousCommand(String autoName)
     {
         RunAuto auto = null;
-
-        if ("TestPath".equals(autoName)) {
-            auto = new RunAuto("TestPath", this.drivetrain, 1, true, this.m_field);
-            auto.setBlockedEvent(new PrintCommand("First shot."), 0);
-            auto.scheduleParallelEvent(new PrintCommand("First intake."), 0, 2.19);
-            auto.scheduleParallelEvent(new PrintCommand("Second shot."), 0, 3.98);
-            auto.scheduleParallelEvent(new PrintCommand("Second intake."), 0, 5.33);
-            auto.scheduleParallelEvent(new PrintCommand("Third shot."), 1, -3.60);
-            auto.scheduleParallelEvent(new PrintCommand("Third intake."), 1, -2.00);
-            auto.setBlockedEvent(new PrintCommand("Final shot."), 1);
-            auto.setBlockedEvent(this.candle.setColor(0,20,30, 1), 0);
-            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 1, -2.00);
-            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 2.19);
-            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 5.33);
-            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 3.98);
-            auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 1, -3.60);
-            auto.setBlockedEvent(this.candle.setColor(0, 255, 0, 1), 1);
-        } else {
-            this.m_field.getObject("traj").setPoses();
-            this.m_field.getObject("trajPoses").setPoses();
+        switch (autoName){
+            case "TestPath":
+                auto = new RunAuto("TestPath", this.drivetrain, 1, true, this.m_field);
+                auto.setBlockedEvent(new PrintCommand("First shot."), 0);
+                auto.scheduleParallelEvent(new PrintCommand("First intake."), 0, 2.19);
+                auto.scheduleParallelEvent(new PrintCommand("Second shot."), 0, 3.98);
+                auto.scheduleParallelEvent(new PrintCommand("Second intake."), 0, 5.33);
+                auto.scheduleParallelEvent(new PrintCommand("Third shot."), 1, -3.60);
+                auto.scheduleParallelEvent(new PrintCommand("Third intake."), 1, -2.00);
+                auto.setBlockedEvent(new PrintCommand("Final shot."), 1);
+                auto.setBlockedEvent(this.candle.setColor(0,20,30, 1), 0);
+                auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 1, -2.00);
+                auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 2.19);
+                auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 5.33);
+                auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 0, 3.98);
+                auto.scheduleParallelEvent(this.candle.setColor(0, 255, 0, 1), 1, -3.60);
+                auto.setBlockedEvent(this.candle.setColor(0, 255, 0, 1), 1);
+                break;
+            case "SourceSide":
+                auto = new RunAuto("SourceSide", this.drivetrain, 1, true, this.m_field);
+                break;
+            case "AmpSide":
+                auto = new RunAuto("AmpSide", this.drivetrain, 1, true, m_field);
+                break;
+            default:
+                this.m_field.getObject("traj").setPoses();
+                this.m_field.getObject("trajPoses").setPoses();
         }
-
-
         return auto;
     }
 }
