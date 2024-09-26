@@ -3201,7 +3201,7 @@
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "intake1"
+                            "name": "intake"
                         }
                     }
                 },
@@ -3214,7 +3214,7 @@
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "intake2"
+                            "name": "intake"
                         }
                     }
                 },
@@ -3227,7 +3227,7 @@
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "intake3"
+                            "name": "intake"
                         }
                     }
                 },
@@ -3240,7 +3240,7 @@
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "shoot1"
+                            "name": "shoot"
                         }
                     }
                 },
@@ -3253,7 +3253,7 @@
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "shoot2"
+                            "name": "shoot"
                         }
                     }
                 },
@@ -3266,72 +3266,7 @@
                     "command": {
                         "type": "named",
                         "data": {
-                            "name": "shoot3"
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 2,
-                    "trajTargetIndex": 2,
-                    "targetTimestamp": 3.3653507437815495,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": ""
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 2,
-                    "trajTargetIndex": 2,
-                    "targetTimestamp": 3.3653507437815495,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": ""
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 2,
-                    "trajTargetIndex": 2,
-                    "targetTimestamp": 3.3653507437815495,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": ""
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 2,
-                    "trajTargetIndex": 2,
-                    "targetTimestamp": 3.3653507437815495,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": ""
-                        }
-                    }
-                },
-                {
-                    "name": "Marker",
-                    "target": 2,
-                    "trajTargetIndex": 2,
-                    "targetTimestamp": 3.3653507437815495,
-                    "offset": 0,
-                    "command": {
-                        "type": "named",
-                        "data": {
-                            "name": ""
+                            "name": "shoot"
                         }
                     }
                 }

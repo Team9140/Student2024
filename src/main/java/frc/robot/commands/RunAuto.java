@@ -7,11 +7,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.lib.ChoreoTrajectory;
+import frc.robot.lib.EventMarker;
 import frc.robot.subsystems.Drivetrain;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.function.Supplier;
 
 public class RunAuto extends Command {
     private final FollowPath[] paths;
@@ -20,6 +21,7 @@ public class RunAuto extends Command {
     private final Command[] finalizedPaths;
     private Drivetrain m_drive;
     private int currentPath;
+    private TreeMap<String, Supplier<Command>> namedEvents;
 
     public RunAuto(String name, Drivetrain drivetrain, int numPaths, boolean mirror, Field2d field) {
         this(name, drivetrain, numPaths, mirror);
@@ -40,6 +42,7 @@ public class RunAuto extends Command {
 
     public RunAuto(String name, Drivetrain drivetrain, int numPaths, boolean mirror) {
         this.m_drive = drivetrain;
+        this.namedEvents = new TreeMap<>();
         this.paths = new FollowPath[numPaths];
         this.blockedEvents = new ArrayList<>(numPaths + 1);
         this.finalizedPaths = new Command[numPaths + 1];
@@ -63,10 +66,35 @@ public class RunAuto extends Command {
         this.blockedEvents.set(position, event);
     }
 
+    public void setNamedEvent(String name, Supplier<Command> eventSupplier) {
+        this.namedEvents.put(name, eventSupplier);
+    }
+    
+    public void parseEventMarkers() {
+        for (int i = 0; i < this.paths.length; i++) {
+            ChoreoTrajectory trajectory = this.paths[i].getTrajectory();
+            List<EventMarker> eventMarkers = trajectory.getEventMarkers();
+            for (EventMarker marker : eventMarkers) {
+                Supplier<Command> command = this.namedEvents.get(marker.getCommand().getData().getName());
+                if (command != null) {
+                    this.scheduleParallelEvent(command.get(), i, marker.getTimestamp());
+                }
+            }
+        }
+    }
+
     public void scheduleParallelEvent(Command event, int stopIndex, double offset) {
         if (offset >= 0) {
+            if (offset > paths[stopIndex].getTotalTime()) {
+                this.scheduleParallelEvent(event, stopIndex + 1, offset - paths[stopIndex].getTotalTime());
+                return;
+            }
             this.parallelEvents.get(stopIndex).add(new Pair<>(offset, event));
         } else {
+            if (offset < -paths[stopIndex - 1].getTotalTime()) {
+                this.scheduleParallelEvent(event, stopIndex - 1, offset + paths[stopIndex - 1].getTotalTime());
+                return;
+            }
             this.parallelEvents.get(stopIndex - 1).add(new Pair<>(paths[stopIndex - 1].getTotalTime() + offset, event));
         }
     }
@@ -119,6 +147,8 @@ public class RunAuto extends Command {
         if (this.paths.length == 0) {
             return;
         }
+
+        this.parseEventMarkers();
 
         this.getPathCommand(0).initialize();
 

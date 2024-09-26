@@ -112,6 +112,12 @@ public class RobotContainer
                 this.m_field.getObject("traj").setPoses();
                 this.m_field.getObject("trajPoses").setPoses();
         }
+
+        if (auto != null) {
+            auto.setNamedEvent("intake", () -> new PrintCommand("intaking..."));
+            auto.setNamedEvent("shoot", () -> new PrintCommand("shooting..."));
+        }
+
         return auto;
     }
 }

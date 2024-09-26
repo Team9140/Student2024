@@ -3052,7 +3052,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "intake1"
+          "name": "intake"
         }
       }
     },
@@ -3061,7 +3061,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "intake2"
+          "name": "intake"
         }
       }
     },
@@ -3070,7 +3070,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "intake3"
+          "name": "intake"
         }
       }
     },
@@ -3079,7 +3079,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "shoot1"
+          "name": "shoot"
         }
       }
     },
@@ -3088,7 +3088,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "shoot2"
+          "name": "shoot"
         }
       }
     },
@@ -3097,52 +3097,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "shoot3"
-        }
-      }
-    },
-    {
-      "timestamp": 3.3653507437815495,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": ""
-        }
-      }
-    },
-    {
-      "timestamp": 3.3653507437815495,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": ""
-        }
-      }
-    },
-    {
-      "timestamp": 3.3653507437815495,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": ""
-        }
-      }
-    },
-    {
-      "timestamp": 3.3653507437815495,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": ""
-        }
-      }
-    },
-    {
-      "timestamp": 3.3653507437815495,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": ""
+          "name": "shoot"
         }
       }
     }
